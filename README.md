@@ -220,13 +220,15 @@ int main(void);
 /*************************************************
 * external interrupt handler
 *************************************************/
+
+// Se crea una función que se denomina hilo
 void EXTI15_10_IRQHandler(void)
 {
-	//Check if the interrupt came from exti13
-	if(EXTI->PR1 & (1 <<13)) {
-		GPIOA->ODR ^= (uint16_t)(1 << 5);
+	// Verifica si la interrupción fue activada por PC13
+	if(EXTI->PR1 & (1 <<13)) {    // PR1 es un registro de bandera 
+		GPIOA->ODR ^= (uint16_t)(1 << 5); //Enciende el LED ubicado en pA5
 
-		// Clear pending bit
+		// Limpia la interrupción, la interrupción no limpia con ceros sino con uno.
 		EXTI->PR1 = 0x00002000;
 	}
 }
@@ -278,6 +280,9 @@ int main(void)
 ~~~
 
 
+## SPI 
+
+## I2C
 
 
 
