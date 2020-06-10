@@ -2,7 +2,7 @@
 
 ## LED ON 
 
-Lo que hace este progrma es encender el LED ubicado en el pin PA5
+Este progrma enciende el LED ubicado en el pin PA5
 
 ~~~
 
@@ -59,7 +59,7 @@ int main(void)
 
 ## Button LED
 
-Lo que hace este programa es que cuando se detecta que se oprimió el pulsador ubicado en el pin PC13, el LED ubicado en PA5 se apaga.
+Este programa  detecta cuando se oprimió el pulsador ubicado en el pin PC13 y apaga el LED ubicado en PA5 .
 
 ~~~
 /**
@@ -195,6 +195,8 @@ void delay(volatile uint32_t s)
 
 ## Interrupción externa 
 
+Este progama hace que el LED ubicado en el pin PA5 se encienda o se apague, cada vez que se oprime el botón ubicado en PC13 utilizando interrupciones externas.
+
 ~~~
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -207,8 +209,7 @@ void delay(volatile uint32_t s)
 
 #include "stm32l476xx.h"
 
-// create a led delay. Just a rough estimate
-// for one second delay
+// Se define una variable LEDDELAY con un valor de 1000
 #define LEDDELAY    1000
 
 /*************************************************
@@ -232,34 +233,36 @@ void EXTI15_10_IRQHandler(void)
 
 int main(void)
 {
-	// Enable GPIOA and GPIOC Peripheral Clock (bit 0 and 2 in AHB2ENR register)
+	// Se habilita el banco A y C 
 	RCC->AHB2ENR = 0x00000005;
 
-	// Make GPIOA Pin5 as output pin (bits 1:0 in MODER register)
-	GPIOA->MODER &= 0xABFFFFFF;		// Clear bits 11, 10 for P5
-	GPIOA->MODER &= 0xFFFFF7FF;		// Write 01 to bits 11, 10 for P5
+	// Se configura el pin PA5
+	GPIOA->MODER &= 0xABFFFFFF;		// Se limpian los bits 10 y 11 correspondientes a P5 donde esta el LED
+	GPIOA->MODER &= 0xFFFFF7FF;		// Se pone 01 en los bits 10 y 11 para que se configure como una salida 
 
-	// Make GPIOD Pin13 as input pin (bits 27:26 in MODER register)
-	GPIOC->MODER &= 0xFFFFFFFF;		// Clear bits 27, 26 for P13
-	GPIOC->MODER &= 0xF3FFFFFF;		// Write 00 to bits 27, 26 for P13
-
-	// enable SYSCFG clock (APB2ENR: bit 0)
-	RCC->APB2ENR = 0x00000001;
+ 	  // Se configura el pin PC13
+	GPIOC->MODER &= 0xFFFFFFFF;		// Se limpian los bits 26 y 27 correspondientes a PC13  donde esta el pulsador
+	GPIOC->MODER &= 0xF3FFFFFF;		// Se pone 00 en los bits 26 y 27 para que se configure como una ENTRADA
+	
+	// Para que la interrupción empiece a trabajar es necesario activar el SYSCFG 
+	RCC->APB2ENR = 0x00000001; // Se habilita el bit 0 
 
 	/* tie push button at PC13 to EXTI4 */
 	// EXTI4 can be configured for each GPIO module.
 	// EXTICR1: 0b XXXX XXXX XXXX 0000
 	//             pin3 pin2 pin1 pin0
 	//
-	// Writing a 0b0010 to pin13 location ties PC13 to EXT4
-	SYSCFG->EXTICR[3] |= 0x0020;	// Write 0002 to map PC13 to EXTI4
-	// Choose either rising edge trigger (RTSR1) or falling edge trigger (FTSR1)
-	EXTI->RTSR1 |= 0x00002000;	// Enable rising edge trigger on EXTI4
-	// Mask the used external interrupt numbers.
-	EXTI->IMR1 |= 0x00002000;	// Mask EXTI4
-	// Set Priority for each interrupt request
-	NVIC->IP[EXTI15_10_IRQn] = 0x10;	// Priority level 1
-	// enable EXT0 IRQ from NVIC
+	// Se va le va a decir al SYSCFG que se va trabajar una interrupción externa.
+	//Se habilita la interrupción 3 porque es la que corresponde a PC13
+	SYSCFG->EXTICR[3] |= 0x0020;	//Se pone 0010 de los bits de 4 a 7 
+	//Se configura que la interrupción va a funcionar con flancos de subida
+	EXTI->RTSR1 |= 0x00002000;	// Se pone un 1 en el bit 13
+	// Se hace un enmascaramiento de la interrupción 
+	EXTI->IMR1 |= 0x00002000;	
+	// Se le da una prioridad a la interrupción nivel 1
+	// EXTI15_10 es el nombre de la prioridad.
+	NVIC->IP[EXTI15_10_IRQn] = 0x10; // El 00 y el 01 no se pueden usar porque pertenece al reset y donde inicia la memoria.
+	// Se habilita la interrupción.
 	NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 
