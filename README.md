@@ -282,6 +282,7 @@ int main(void)
 
 ## SPI 
 
+Este progama configura una pantalla de papel con una configuración de comunicación SPI
 ~~~
 /**
  ******************************************************************************
@@ -417,6 +418,113 @@ void spi_init(void)
 
 ## I2C
 
+~~~
 
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+ */
+
+/*************************************************
+* Libraries include
+*************************************************/
+#include "stm32l476xx.h"
+/*************************************************
+* definition variables
+*************************************************/
+
+/*************************************************
+* function prototyping
+*************************************************/
+// these should go to cs43l22 related headers
+#define CS43L22_ADDRESS 0x5A
+#define CS43L22_REG_ID  0x01
+#define CS43L22_CHIP_ID 0x1C // first 5 bits of reg
+
+volatile uint8_t DeviceAddr = CS43L22_ADDRESS;
+
+/*************************************************
+* function declarations
+*************************************************/
+int main(void);
+
+
+void i2c_write(uint8_t regaddr, uint8_t data) {
+
+	// set Address
+	I2C1->CR2 |= 0x78;
+	// set Bytes to write
+	I2C1->CR2 |= (0x002 << 16);
+
+	// send start condition
+	I2C1->CR2 |= (1 << 13);
+
+    // send data
+    // wait until byte transfer complete
+    I2C1->TXDR = 0x00;
+    while (!(I2C1->ISR & 0x00000002));
+    I2C1->TXDR = data;
+    while (!(I2C1->ISR & 0x00000020));
+
+}
+
+void I2C1_ER_IRQHandler(){
+    // error handler
+    GPIOA->ODR |= (1 << 5); //LED
+}
+/*************************************************
+* Main
+*************************************************/
+int main(void)
+{
+	// Enable GPIOA and GPIOB Peripheral Clock
+	RCC->AHB2ENR = 0x00000003;
+
+	// enable I2C clock, bit 21 on APB1ENR
+	RCC->APB1ENR1 |= (1 << 21);
+
+	// setup I2C pins
+	// set pin modes as alternate, GPIOB
+	// Write 10 to bits 8 and 9
+	GPIOB->MODER &= 0xFFFAFFFF;
+	GPIOB->OTYPER |= 0x00000300;
+
+	// choose AF4 for SPI1 in Alternate Function registers
+	GPIOB->AFR[1] |= (4 << 0); // for pin 8
+	GPIOB->AFR[1] |= (4 << 4); // for pin 9
+
+	I2C1->CR1 |= (1 << 7); // enable error interrupt
+	I2C1->CR2 |= (1 << 25); // Auto end Stop
+	I2C1->CR2 |= (0 << 11); // 7 bit mode
+
+	I2C1->TIMINGR |= (0x1414 << 0); // for 100khz
+	// set own address to 00 - not really used in master mode
+	I2C1->OAR1 |= (0x00 << 1);
+	I2C1->OAR1 |= (1 << 15); // bit 15 The received slave address OA1 is ACKed
+
+	// enable error interrupt from NVIC
+	NVIC_SetPriority(I2C1_ER_IRQn, 1);
+	NVIC_EnableIRQ(I2C1_ER_IRQn);
+
+	I2C1->CR1 |= (1 << 0); // enable i2c
+
+	// Config LED status Error
+	GPIOA->MODER &= 0xFFFFF7FF;
+
+	// Write Data
+	i2c_write(CS43L22_REG_ID, 0xAE);
+
+	while(1)
+	{
+
+	}
+
+	__asm__("NOP"); // Assembly inline can be used if needed
+	return 0;
+}
+
+~~~
 
 
