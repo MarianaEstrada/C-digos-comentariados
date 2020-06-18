@@ -282,7 +282,7 @@ int main(void)
 
 ## SPI 
 
-El bus síncrono SPI (Interfaz Periférica Serial) tiene una arquitectura tipo maestro/esclavo, el dispositivo maestro porporciona una señal de reloj para mantener a todos los dispositivos sincronizados, puede iniciar la comunicacion entre varios esclavos y recibir datos e informacion de ellos o enviandola, donde a su vez estos no pueden comunicarse entre ellos para intermcabiar información.El bus SPI tiene una comunicación Full-Duplex, es decir, tiene dos líneas de comunicaciónn para enviar y recibir datos simultáneamente.
+El bus síncrono SPI (Interfaz Periférica Serial) tiene una arquitectura tipo maestro/esclavo, el dispositivo maestro porporciona una señal de reloj para mantener a todos los dispositivos sincronizados, puede iniciar la comunicacion entre varios esclavos y recibir datos e informacion de ellos o enviandola, donde a su vez estos no pueden comunicarse entre ellos para intermcabiar información.El bus SPI tiene una comunicación Full-Duplex, es decir, tiene dos líneas de comunicación para enviar y recibir datos simultáneamente.
 
 A continuación se presenta la conexión maestro escalvo de la SPI:
 
@@ -290,14 +290,14 @@ A continuación se presenta la conexión maestro escalvo de la SPI:
 ![SPI](https://github.com/MarianaEstrada/C-digos-comentariados/blob/master/Imagenes/SPI.PNG)
 
 Donde:
-* MOSI: Para la comunicaci ́on del maestro al esclavo.
-* MISO: Para la comunicaci ́on del esclavo al maestro.
-* SCK: Se ̃nal del reloj enviada por el maestro.
-* SS: Para la secci ́on de cada dispositivo esclavo conectado.
+* MOSI: Para la comunicación del maestro al esclavo.
+* MISO: Para la comunicación del esclavo al maestro.
+* SCK: Señal del reloj enviada por el maestro.
+* SS: Para la sección de cada dispositivo esclavo conectado.
 
 ### Ejemplo del SPI: 
 
-Este progama configura una pantalla de papel con una configuración de comunicación SPI
+Este progama configura una pantalla de papel con una comunicación SPI
 ~~~
 /**
  ******************************************************************************
@@ -444,6 +444,7 @@ La arquitectura de este bus es del tipo maestro/esclavo;donde  el  dispositivo  
 ### Ejemplo del I2C
 
 
+Este progama configura una pantalla de papel con una comunicación I2C, además posee un LED que se enciende cuando hay un error en la transmisión
 ~~~
 
  * the "License"; You may not use this file except in compliance with the
@@ -464,7 +465,7 @@ La arquitectura de este bus es del tipo maestro/esclavo;donde  el  dispositivo  
 /*************************************************
 * function prototyping
 *************************************************/
-// these should go to cs43l22 related headers
+// Se definen las direcciones de los esclavos 
 #define CS43L22_ADDRESS 0x5A
 #define CS43L22_REG_ID  0x01
 #define CS43L22_CHIP_ID 0x1C // first 5 bits of reg
@@ -476,8 +477,12 @@ volatile uint8_t DeviceAddr = CS43L22_ADDRESS;
 *************************************************/
 int main(void);
 
-
+//Esta función es la que nos va a permitir escribir los datos 
 void i2c_write(uint8_t regaddr, uint8_t data) {
+
+// I2C_CR2 es el control register.
+// Ahora se va a configurar la dirección del esclavo, el mensaje que va a ser enviado y 
+la condición inicial.
 
 	// set Address
 	I2C1->CR2 |= 0x78;
@@ -487,6 +492,9 @@ void i2c_write(uint8_t regaddr, uint8_t data) {
 	// send start condition
 	I2C1->CR2 |= (1 << 13);
 
+    
+    //I2C_TXDR es el trasmit data register
+    // Se configura el bus de trasmisión para enviar los datos.
     // send data
     // wait until byte transfer complete
     I2C1->TXDR = 0x00;
@@ -497,6 +505,7 @@ void i2c_write(uint8_t regaddr, uint8_t data) {
 }
 
 void I2C1_ER_IRQHandler(){
+    // Se pone un 1 lógico al pin PA5
     // error handler
     GPIOA->ODR |= (1 << 5); //LED
 }
@@ -505,24 +514,32 @@ void I2C1_ER_IRQHandler(){
 *************************************************/
 int main(void)
 {
-	// Enable GPIOA and GPIOB Peripheral Clock
+	// Se habilita el banco A y el banco B.
 	RCC->AHB2ENR = 0x00000003;
 
-	// enable I2C clock, bit 21 on APB1ENR
-	RCC->APB1ENR1 |= (1 << 21);
+	// Se configura el reloj para poder usar la comunicación I2C 
+	RCC->APB1ENR1 |= (1 << 21); // Se habilita el bit 21
 
+
+        // En el banco B de la tarjeta se encuentra SCL (pin 8) y SDA (pin9).
 	// setup I2C pins
 	// set pin modes as alternate, GPIOB
-	// Write 10 to bits 8 and 9
+	// Se pone 10 en los pines 8 y 9 para que queden en alternate function mode
 	GPIOB->MODER &= 0xFFFAFFFF;
 	GPIOB->OTYPER |= 0x00000300;
 
 	// choose AF4 for SPI1 in Alternate Function registers
+	// Se pone 0100 para que sea el modo AF4
 	GPIOB->AFR[1] |= (4 << 0); // for pin 8
 	GPIOB->AFR[1] |= (4 << 4); // for pin 9
 
+
+	// Se va a configurar la alarma de encender un LED haya un error en la transmisión
+	// Se pone un 1 en el bit 7 para habilitar la detección de errores
 	I2C1->CR1 |= (1 << 7); // enable error interrupt
+	// Se pone un 1 para el modo final automatico, envia automaticamente una conddición de detención
 	I2C1->CR2 |= (1 << 25); // Auto end Stop
+	//  El mestro funciona en modo de direccionamiento de 7 bits
 	I2C1->CR2 |= (0 << 11); // 7 bit mode
 
 	I2C1->TIMINGR |= (0x1414 << 0); // for 100khz
