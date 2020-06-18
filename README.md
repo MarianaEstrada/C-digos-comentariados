@@ -418,6 +418,16 @@ void spi_init(void)
 
 ## I2C
 
+
+El bus I2C requiere de dos conexiones para su funcionamiento, el primero es  una  conexión  de  la  señal  de  reloj  y  la  segunda  es  para  el  envío  de  datos.  En  el  bus, cada  uno  de  los dispositivos que se vayan a manejar deben tener una ́unica dirección, de tal forma que se pueda acceder a cada uno de los dispositivos de forma individual. 
+
+La arquitectura de este bus es del tipo maestro/esclavo;donde  el  dispositivo  maestro  puede  enviar  y  recibir  los  datos  de  los  esclavos  y  además  es  el ́unico  que puede iniciar la comunicación, es decir, que los esclavos no pueden hablar directamente entre sí. Como el bus I2C es síncrono, el maestro brinda una ́unica señal de reloj, que permite la sincronización con todos los dispositivos del bus. Si se desea emplear velocidades o distancias muy grandes, es necesario colocar resistencias de PULL - UP externas.
+
+
+
+
+
+
 ~~~
 
  * the "License"; You may not use this file except in compliance with the
