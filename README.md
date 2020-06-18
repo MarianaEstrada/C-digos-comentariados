@@ -534,7 +534,7 @@ int main(void)
 	GPIOB->AFR[1] |= (4 << 4); // for pin 9
 
 
-	// Se va a configurar la alarma de encender un LED haya un error en la transmisión
+	// Se va a configurar encender un LED cuando haya un error en la transmisión
 	// Se pone un 1 en el bit 7 para habilitar la detección de errores
 	I2C1->CR1 |= (1 << 7); // enable error interrupt
 	// Se pone un 1 para el modo final automatico, envia automaticamente una conddición de detención
@@ -544,13 +544,16 @@ int main(void)
 
 	I2C1->TIMINGR |= (0x1414 << 0); // for 100khz
 	// set own address to 00 - not really used in master mode
+	
 	I2C1->OAR1 |= (0x00 << 1);
+	// Se pone un 1 en el bit 15 lo que indica que la dirección esclava recibida OA1 es ACKed.
 	I2C1->OAR1 |= (1 << 15); // bit 15 The received slave address OA1 is ACKed
 
 	// enable error interrupt from NVIC
 	NVIC_SetPriority(I2C1_ER_IRQn, 1);
 	NVIC_EnableIRQ(I2C1_ER_IRQn);
 
+	// Se pone un 1 en el bit 0 para habilitar el periferico.
 	I2C1->CR1 |= (1 << 0); // enable i2c
 
 	// Config LED status Error
