@@ -1,8 +1,12 @@
 # Códigos comentariados
 
+## GPIO
+
 Para conocer más acerca de GPIO ingresa [aquí](https://github.com/MarianaEstrada/Guia_GPIO "GPIO")
 
-## LED ON 
+A continuación se presentan algunos ejemplos de GPIO:
+
+### LED ON 
 
 Este progrma enciende el LED ubicado en el pin PA5
 
@@ -59,7 +63,7 @@ int main(void)
 ~~~~
 
 
-## Button LED
+### Button LED
 
 Este programa  detecta cuando se oprimió el pulsador ubicado en el pin PC13 y apaga el LED ubicado en PA5 .
 
@@ -124,7 +128,7 @@ int main(void)
 }
 ~~~
 
-## LED blink
+### LED blink
 
 Este programa hace que el LED ubicado en PA5 titile cada 1seg.
 
@@ -282,7 +286,7 @@ int main(void)
 ~~~
 
 
-## SPI 
+## Comunicación SPI 
 
 El bus síncrono SPI (Interfaz Periférica Serial) tiene una arquitectura tipo maestro/esclavo, el dispositivo maestro porporciona una señal de reloj para mantener a todos los dispositivos sincronizados, puede iniciar la comunicacion entre varios esclavos y recibir datos e informacion de ellos o enviandola, donde a su vez estos no pueden comunicarse entre ellos para intermcabiar información.El bus SPI tiene una comunicación Full-Duplex, es decir, tiene dos líneas de comunicación para enviar y recibir datos simultáneamente.
 
@@ -433,7 +437,7 @@ void spi_init(void)
 
 ~~~
 
-## I2C
+## Comunicación I2C
 
 
 El bus I2C requiere de dos conexiones para su funcionamiento, el primero es  una  conexión  de  la  señal  de  reloj  y  la  segunda  es  para  el  envío  de  datos.  En  el  bus, cada  uno  de  los dispositivos que se vayan a manejar deben tener una ́unica dirección, de tal forma que se pueda acceder a cada uno de los dispositivos de forma individual. 
