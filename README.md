@@ -1,5 +1,7 @@
 # Códigos comentariados
 
+Para conocer más acerca de GPIO ingresa [aquí](https://github.com/MarianaEstrada/Guia_GPIO "GPIO")
+
 ## LED ON 
 
 Este progrma enciende el LED ubicado en el pin PA5
@@ -573,4 +575,8 @@ int main(void)
 
 ~~~
 
+## Webgrafía
+
+* https://aprendiendoarduino.wordpress.com/2017/07/09/i2c/
+* https://www.luisllamas.es/arduino-spi/
 
